@@ -23,7 +23,6 @@ yarn-debug.log*
 yarn-error.log*
 
 #my
-.gitignore
 .eslintcache
 debug.log
 /.vscode
