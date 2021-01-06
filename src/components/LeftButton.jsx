@@ -1,37 +1,27 @@
 import { useSContext } from './../context/SliderContext'
-import { useState, useEffect } from 'react'
+import { useBContext } from './../context/ButtonContext'
 
 export const LeftButton = () => {
     const sc = useSContext()
+    const bc = useBContext()
 
-    const [disabled, setDisabled] = useState(false)
-    const [isMoving, setIsMoving] = useState(false)
-
-    useEffect(() => {
-        if(isMoving) {
-            !disabled ? setDisabled(true) : setIsMoving(false)
-        }
-        !sc.prev.current.isMoving && disabled && setDisabled(false)
-    }, [disabled, sc, isMoving])
-    
     const clickHandler = () => {
         if (sc.prev.current) {   
 
             if (sc.prev.current.currentSlide === -sc.visibleSlides + 1) {
                 sc.setCurrentSlide('-', sc.prev.current.currentSlide,  sc.itemsCount - sc.visibleSlides)
-                
-                return setIsMoving(true)
+                bc.setIsMoving(true)
             } else {    
                 sc.setCurrentSlide("-", sc.prev.current.currentSlide)
             }
         }
     }
 
-    console.log("RENDER: LeftButton", sc.prev.current)
+    console.log("RENDER: LeftButton", bc)
     return (
         <button
-            disabled={disabled}
-            onClick={() => !disabled && clickHandler()}
+            disabled={bc.isMoving}
+            onClick={() => !bc.isMoving && clickHandler()}
         >
             Left
         </button>  

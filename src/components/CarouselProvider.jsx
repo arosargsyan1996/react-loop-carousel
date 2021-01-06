@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { initCContext, CarouselContext } from './../context/CarouselContext'
 import { initSContext, SliderContext } from './../context/SliderContext'
+import { ButtonContext } from './../context/ButtonContext'
 
 
 
@@ -15,23 +16,29 @@ export const CarouselProvider = ({ children, visibleSlides, loop, innerPadding, 
 
     const [sliderWidth, setSliderWidth] = useState(0)
     const [localCurrentSlide, setLocalCurrentSlide] = useState(currentSlide ? currentSlide : initCContext.currentSlide)
+    const [isMoving, setIsMoving] = useState(false)
 
     useEffect(() => {
-        if (prev.current && prev.current.isMoving) {           
-            if (prev.current.dir === 'Left' && localCurrentSlide === itemsCount - localVisibleSlides) {
-                console.log("useEffect", prev.current.currentSlide, localCurrentSlide)
-                prev.current.currentSlide = localCurrentSlide
-                prev.current.isMoving = false
-                return setLocalCurrentSlide(localCurrentSlide - 1)
-            } else if (prev.current.dir === 'Right' && localCurrentSlide === 0) {
-                console.log("useEffect", prev.current.currentSlide, localCurrentSlide)
-                prev.current.currentSlide = localCurrentSlide
-                prev.current.isMoving = false
-                return setLocalCurrentSlide(1)  
+        if (prev.current) {
+            if (prev.current.isMoving) {
+                if (prev.current.dir === 'Left' && localCurrentSlide === itemsCount - localVisibleSlides) {
+                    console.log("useEffect", prev.current.currentSlide, localCurrentSlide)
+                    prev.current.currentSlide = localCurrentSlide
+                    prev.current.isMoving = false
+                    return setLocalCurrentSlide(localCurrentSlide - 1)
+                } else if (prev.current.dir === 'Right' && localCurrentSlide === 0) {
+                    console.log("useEffect", prev.current.currentSlide, localCurrentSlide)
+                    prev.current.currentSlide = localCurrentSlide
+                    prev.current.isMoving = false
+                    return setLocalCurrentSlide(1)  
+                }
+            } else {
+                isMoving && console.log('USE_EFFECT: LAST')   
+                isMoving && setIsMoving(false)
             }
         }
         
-    }, [localCurrentSlide, itemsCount, localVisibleSlides])
+    }, [localCurrentSlide, itemsCount, localVisibleSlides, isMoving])
 
     const setSlideWidth = (width, padding, count) => {
         if (width) {
@@ -96,17 +103,23 @@ export const CarouselProvider = ({ children, visibleSlides, loop, innerPadding, 
     const CValues = {
         currentSlide: localCurrentSlide,
     }
+    const BValues = useMemo(()=>({
+        isMoving: isMoving,
+        setIsMoving
+    }),[isMoving])
 
     console.log("RENDER: CarouselProvider")
     return (
         <CarouselContext.Provider value={CValues}>
             <SliderContext.Provider value={SValues}>
-                <div
-                    ref={(el) => el && !sliderWidth && setSliderWidth(el.offsetWidth)}
-                    className="trc__carousel"
-                >
-                    {sliderWidth && children}
-                </div>
+                <ButtonContext.Provider value={BValues}>
+                    <div
+                        ref={(el) => el && !sliderWidth && setSliderWidth(el.offsetWidth)}
+                        className="trc__carousel"
+                    >
+                        {sliderWidth && children}
+                    </div>
+                </ButtonContext.Provider>
             </SliderContext.Provider>
         </CarouselContext.Provider>
     )
